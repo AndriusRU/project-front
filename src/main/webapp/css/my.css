@@ -26,7 +26,49 @@ td, th {
     margin-bottom: 5px;
 }
 
-/*.dropdown-list select {*/
-/*    flex: 1;*/
-/*    min-width: 0; !* Предотвращает выход за границы контейнера *!*/
+#pagination {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-top: 0.5em;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2em 0.5em;
+    margin: 0.1em;
+    border: 1px solid #9CA3AF;
+    border-radius: 8px;
+    background: #D1D5DB;
+    color: #111827;
+    font: inherit;
+    cursor: pointer;
+    width: fit-content;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.btn:hover {
+    background: #BCC5CC;
+    border-color: #8A939C;
+}
+
+/*.btn:active {*/
+/*    transform: scale(0.9);*/
+/*    background: #A8B1B9;*/
 /*}*/
+
+.btn.active {
+    color: red;
+    background: #D1D5DB;
+    border: 2px solid #9CA3AF;
+    font-weight: 600;
+}
+
+.btn.active:hover {
+    background: #BCC5CC;
+    border-color: #78716C;
+}
+
