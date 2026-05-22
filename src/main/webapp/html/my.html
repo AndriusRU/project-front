@@ -1,11 +1,115 @@
 <html>
 <head>
     <title>RPG</title>
+    <meta charset="UTF-8">
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
 <body>
-<h1>RPG admin panel</h1>
+    <h1>RPG admin panel</h1>
 
+    <div class="dropdown-list">
+        <label for="counter-per-page"> Count per page</label>
+        <select id="counter-per-page">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+
+    <table id="main-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Title</th>
+                <th>Race</th>
+                <th>Profession</th>
+                <th>Level</th>
+                <th>Birthday</th>
+                <th>Banned</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Код выполнится сразу после построения DOM
+            print_table();
+        });
+
+        function print_table(page_number){
+            $("tbody").remove();
+            let url = "/rest/players";
+
+            $.get(url, function (response){
+                console.log(response);
+                console.log(getTotalCount());
+                const $tbody = $("<tbody>").appendTo("#main-table");
+                $.each(response, function(idx, item) {
+                    console.log(idx);
+                    console.log(item);
+                    // Object { id: 1, name: "Ниус", title: "Приходящий Без Шума", race: "HOBBIT", profession: "ROGUE", birthday: 1244497480000, banned: false, level: 33 }
+                    $("<tr>").html("<td>" + item.id + "</td>"
+                        + "<td>" + item.name + "</td>"
+                        + "<td>" + item.title + "</td>"
+                        + "<td>" + item.race + "</td>"
+                        + "<td>" + item.profession + "</td>"
+                        + "<td>" + item.level + "</td>"
+                        + "<td>" + new Date(item.birthday).toLocaleDateString() + "</td>"
+                        + "<td>" + item.banned + "</td>"
+                    ).appendTo($tbody);
+                })
+                // $.each(response, function (i, item){
+                //
+                //     $('<tr>').html("<td>"
+                //         + item.id + "</td><td>"
+                //         + item.name + "</td><td>"
+                //         + item.title + "</td><td>"
+                //         + item.race + "</td><td>"
+                //         + item.profession + "</td><td>"
+                //         + item.level + "</td><td>"
+                //         + new Date(item.birthday).toLocaleDateString().replaceAll(".", "/") + "</td><td>"
+                //         + item.banned + "</td><td>"
+                //         + "<button id='button_edit" + item.id + "' onclick='editAcc("+ item.id + ")'>"
+                //         + "<i class=\"material-icons\">edit</i>"
+                //         + "</button>" + "</td><td>"
+                //         + "<button id='button_dlt" + item.id + "' onclick='deleteAcc("+ item.id + ")'>"
+                //         + "<i class=\"material-icons\">delete</i>"
+                //         + "</button>" + "</td>"
+                //     ).appendTo("#tbl");
+                // })
+            })
+            // let totalCount = getCountAccount();
+            // let pagesCount = Math.ceil(totalCount / countPerPage);
+            // console.log("pagesCount: " + pagesCount);
+            // $("button.pgn-btn-styled").remove();
+            // for (let i = 0; i < pagesCount; i++){
+            //     let button_tag = "<button>" + (i + 1) + "</button>";
+            //     let btn = $(button_tag)
+            //         .attr('id', "paging_btn" + i)
+            //         .attr('onclick', 'print_table(' + i + ')')
+            //         .addClass('pgn-btn-styled');
+            //     $("#pgn_buttons").append(btn);
+            // }
+            // let identifier = "#paging_btn" + page_number;
+            // $(identifier).css('color', 'red');
+        }
+
+        function getTotalCount() {
+            let url = "/rest/players/count";
+            let result = 0;
+            $.ajax({
+                url: url,
+                async: false,
+                success: function (data) {
+                    result = parseInt(data);
+                }
+            })
+            return result;
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,32 @@
+table {
+    border: 2px solid gray;
+    width: auto;
+    align-items: center;
+}
+
+td, th {
+    border: 1px solid gray;
+    padding: 10px;
+    text-align: left;
+}
+
+.dropdown-list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px;
+    width: 200px;
+    height: 34px;
+    background: #FFFFFF;
+    border: 1px solid black;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+/*.dropdown-list select {*/
+/*    flex: 1;*/
+/*    min-width: 0; !* Предотвращает выход за границы контейнера *!*/
+/*}*/
