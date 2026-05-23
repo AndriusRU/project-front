@@ -86,7 +86,7 @@
                     //     document.querySelector(selector).src = '/img/save.png';
                     // }
 
-                    editAccount(btn);
+                    editSaveAccount(btn);
                 }
             });
 
@@ -264,7 +264,44 @@
             });
         }
 
-        function editAccount(pressedBtn) {
+        function saveAccount(id, data, row) {
+            const url = '/rest/players/' + id;
+            console.log(data);
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    for (let entry of Object.entries(data)) {
+                        let field = entry[0];
+                        let value = entry[1];
+
+                        const cell = row.querySelector('td[data-field="' + field + '"]');
+
+                        if (cell) {
+                            if (field === 'banned') {
+                                if (value === true || value === 'true') {
+                                    cell.textContent = 'true';
+                                } else {
+                                    cell.textContent = 'false';
+                                }
+                            } else if (field !== 'id' && field !== 'birthday' && field !== 'level') {
+                                cell.textContent = value;
+                            } else if (field === 'birthday') {
+                                cell.textContent = new Data(value).toLocaleString();
+                            }
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    alert('Ошибка сохранения: ' + (xhr.responseJSON?.message || 'Неизвестная ошибка'));
+                    // При ошибке можно вызвать editAccount(pressedBtn) снова, чтобы откатить изменения
+                }
+            });
+        }
+
+        function editSaveAccount(pressedBtn) {
             const row = pressedBtn.closest('tr');
             if (!row) return;
 
@@ -282,6 +319,27 @@
                 if (btnDelete) btnDelete.classList.add('hidden');
 
                 enableInlineEditing(row, btnId);
+            } else {
+                pressedBtn.classList.remove(editingMode);
+                const img = pressedBtn.querySelector('img');
+
+                if (img) img.src = '/img/edit.png';
+
+                const btnDelete = document.getElementById('btn_delete_' + btnId);
+                if (btnDelete) btnDelete.classList.remove('hidden');
+
+                const updatedData = {};
+                row.querySelectorAll('[data-field]').forEach(elem => {
+                    const field = elem.dataset.field;
+
+                    if (elem.tagName === 'SELECT') {
+                        updatedData[field] = elem.value;
+                    } else if (elem.tagName === 'INPUT') {
+                        updatedData[field] = elem.value;
+                    }
+                });
+
+                saveAccount(btnId, updatedData, row);
             }
         }
 
