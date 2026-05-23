@@ -55,11 +55,6 @@ td, th {
     border-color: #8A939C;
 }
 
-/*.btn:active {*/
-/*    transform: scale(0.9);*/
-/*    background: #A8B1B9;*/
-/*}*/
-
 .btn.active {
     color: red;
     background: #D1D5DB;

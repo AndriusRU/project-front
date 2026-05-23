@@ -29,6 +29,9 @@
                 <th>Level</th>
                 <th>Birthday</th>
                 <th>Banned</th>
+                <th>Edit</th>
+                <th>Delete</th>
+
             </tr>
         </thead>
         <tbody></tbody>
@@ -39,10 +42,10 @@
     </div>
 
     <script>
+        // load scripts
         document.addEventListener('DOMContentLoaded', () => {
             //Наполняем Select
             createSelectList()
-
             showAccounts();
 
             let counterPerPage = document.getElementById("counter-per-page");
@@ -53,65 +56,29 @@
             }
 
             document.getElementById("pagination").addEventListener("click", (e) => {
-                if (e.target.classList.contains("btn")) {
-                    let numberPage = parseInt(e.target.id.replace("page_",""));
-                    console.log("Number page", numberPage);
+                let btn = e.target.closest('.btn');
+
+                if (btn && btn.parentElement.id === 'pagination') {
+                    let numberPage = parseInt(btn.id.replace("page_",""));
+                    // console.log("Number page", numberPage);
                     showAccounts(numberPage);
                 }
-            })
+            });
+
+            document.addEventListener('click', (event) => {
+               const btnDelete = event.target.closest('[id^="btn_delete_"]');
+
+               if (!btnDelete) return;
+               event.preventDefault();
+
+               let btnId = btnDelete.id.replace('btn_delete_','');
+               // console.log("ID del -", btnId, btnDelete);
+                deleteAccount(btnId);
+            });
 
         });
 
-        function showAccounts(page_number){
-            $("tbody").remove();
-            let url = "/rest/players";
-
-            let totalCount = getTotalCount();
-            let countPerPage = getCountPerPage();
-
-            if (page_number == null) {
-                page_number = 0;
-            }
-
-            url = url.concat("?").concat("pageSize=").concat(countPerPage);
-            url = url.concat("&pageNumber=").concat(page_number);
-            console.log("url", url);
-
-            $.get(url, function (response){
-                const $tbody = $("<tbody>").appendTo("#main-table");
-                $.each(response, function(idx, item) {
-                    // Object { id: 1, name: "Ниус", title: "Приходящий Без Шума", race: "HOBBIT", profession: "ROGUE", birthday: 1244497480000, banned: false, level: 33 }
-                    $("<tr>").html("<td>" + item.id + "</td>"
-                        + "<td>" + item.name + "</td>"
-                        + "<td>" + item.title + "</td>"
-                        + "<td>" + item.race + "</td>"
-                        + "<td>" + item.profession + "</td>"
-                        + "<td>" + item.level + "</td>"
-                        + "<td>" + new Date(item.birthday).toLocaleDateString() + "</td>"
-                        + "<td>" + item.banned + "</td>"
-                    ).appendTo($tbody);
-                })
-            });
-
-            let pagesCount = Math.ceil(totalCount / countPerPage);
-            $("#pagination .btn").remove();
-
-            for (let i = 0; i < pagesCount; i++) {
-                let tagButton = "<button>" + (i + 1) + "</button>";
-                let newButton = $(tagButton).attr("id", "page_" + i).addClass("btn");
-                $("#pagination").append(newButton);
-            }
-
-            // if (page_number == null) {
-            //     page_number = 1;
-            // }
-
-            let current_page = "#page_" + page_number;
-            console.log("Current page", current_page);
-            $(current_page).addClass("active");
-
-        }
-
+        // usefully scripts
         function getTotalCount() {
             let url = "/rest/players/count";
             let result = 0;
@@ -152,6 +119,76 @@
             let selectedIdx = counter.selectedIndex;
 
             return parseInt(counter.options[selectedIdx].value);
+        }
+
+        function getCurrentPage() {
+            let stringCurrentPage = $('#pagination .btn.active').attr("id");
+            stringCurrentPage = stringCurrentPage.replace('page_','');
+            return parseInt(stringCurrentPage);
+        }
+
+        // Account scripts
+        function showAccounts(page_number){
+            $("tbody").remove();
+            let url = "/rest/players";
+
+            let totalCount = getTotalCount();
+            let countPerPage = getCountPerPage();
+
+            if (page_number == null) {
+                page_number = 0;
+            }
+
+            url = url.concat("?").concat("pageSize=").concat(countPerPage);
+            url = url.concat("&pageNumber=").concat(page_number);
+            // console.log("url", url);
+
+            $.get(url, function (response){
+                const $tbody = $("<tbody>").appendTo("#main-table");
+                $.each(response, function(idx, item) {
+                    // Object { id: 1, name: "Ниус", title: "Приходящий Без Шума", race: "HOBBIT", profession: "ROGUE", birthday: 1244497480000, banned: false, level: 33 }
+                    $("<tr>").html("<td>" + item.id + "</td>"
+                        + "<td>" + item.name + "</td>"
+                        + "<td>" + item.title + "</td>"
+                        + "<td>" + item.race + "</td>"
+                        + "<td>" + item.profession + "</td>"
+                        + "<td>" + item.level + "</td>"
+                        + "<td>" + new Date(item.birthday).toLocaleDateString() + "</td>"
+                        + "<td>" + item.banned + "</td>"
+                        + "<td><button id='btn_edit_" + item.id + "' class='btn'>" + "<img src='/img/edit.png' alt='Edit'>" + "</button></td>"
+                        + "<td><button id='btn_delete_" + item.id + "' class='btn'>" + "<img src='/img/delete.png' alt='Delete'>" + "</button></td>"
+                    ).appendTo($tbody);
+                })
+            });
+
+            let pagesCount = Math.ceil(totalCount / countPerPage);
+            $("#pagination .btn").remove();
+
+            for (let i = 0; i < pagesCount; i++) {
+                let tagButton = "<button>" + (i + 1) + "</button>";
+                let newButton = $(tagButton).attr("id", "page_" + i).addClass("btn");
+                $("#pagination").append(newButton);
+            }
+
+            let current_page = "#page_" + page_number;
+            // console.log("Current page", current_page);
+            $(current_page).addClass("active");
+
+        }
+
+        function deleteAccount(idAccount) {
+            let url = "/rest/players/" + idAccount;
+            $.ajax({
+                url: url,
+                type: "DELETE",
+                success: () => {
+                    showAccounts(getCurrentPage());
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ошибка удаления:', error);
+                    alert('Не удалось удалить: ' + (xhr.responseJSON?.message || error));
+                }
+            });
         }
 
 
