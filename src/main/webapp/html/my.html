@@ -66,14 +66,28 @@
             });
 
             document.addEventListener('click', (event) => {
-               const btnDelete = event.target.closest('[id^="btn_delete_"]');
+               const btn = event.target.closest('[id^="btn_delete_"], [id^="btn_edit_"]');
 
-               if (!btnDelete) return;
+               if (!btn) return;
                event.preventDefault();
 
-               let btnId = btnDelete.id.replace('btn_delete_','');
-               // console.log("ID del -", btnId, btnDelete);
-                deleteAccount(btnId);
+               if (btn.id.startsWith('btn_delete_')) {
+                   let btnId = btn.id.replace('btn_delete_','');
+                   deleteAccount(btnId);
+               }
+
+                if (btn.id.startsWith('btn_edit_')) {
+                    let btnId = btn.id.replace('btn_edit_','');
+                    // Скрытие кнопки Delete
+                    // document.getElementById('btn_delete_' + btnId).classList.add('hidden');
+                    //
+                    // const selector = '#btn_edit_' + btnId + ' img';
+                    // if (document.querySelector(selector)) {
+                    //     document.querySelector(selector).src = '/img/save.png';
+                    // }
+
+                    editAccount(btn);
+                }
             });
 
         });
@@ -113,11 +127,11 @@
             let counter = document.getElementById("counter-per-page");
 
             if (!counter) {
-                return parseInt(counter.options[0].value);
+                // return parseInt(counter.options[0].value);
+                return 5;
             }
 
             let selectedIdx = counter.selectedIndex;
-
             return parseInt(counter.options[selectedIdx].value);
         }
 
@@ -126,6 +140,65 @@
             stringCurrentPage = stringCurrentPage.replace('page_','');
             return parseInt(stringCurrentPage);
         }
+
+        // Списки значений полей
+        const selectConfigs = {
+            race: ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT'],
+            profession: ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID'],
+            banned: ['false', 'true']
+        };
+
+        function createSelectHTML(field, idAccount, currentValue) {
+            const options = selectConfigs[field];
+            if (!options) return '';
+
+            const selectId = 'select_' + field + '_' + idAccount;
+            const current = String(currentValue).toUpperCase();
+
+            let html = '';
+            for (let option of options) {
+                if (String(option) === current) {
+                    html += '<option value=' + option + ' selected>' + option + '</option>';
+                } else {
+                    html += '<option value=' + option + '>' + option + '</option>';
+                }
+            }
+
+            return '<select id=' + selectId + ' name=' + field + 'data-field=' + field + ' class="inline-edit-input">' + html + '</select>';
+        }
+
+        function enableInlineEditing(row, idAccount) {
+            const fieldTypes = {
+                name: 'text',
+                title: 'text',
+                race: 'select',
+                profession: 'select',
+                banned: 'select',
+            };
+
+            for (let entry of Object.entries(fieldTypes)) {
+                let field = entry[0];
+                let type = entry[1];
+
+                const cell = row.querySelector('td[data-field="' + field + '"]');
+                if (!cell) continue;
+
+                const currentVal = cell.textContent.trim();
+
+                if (type === 'select') {
+                    cell.innerHTML = createSelectHTML(field, idAccount, currentVal);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = type;
+                    input.value = currentVal;
+                    input.classList.add('inline-edit-input');
+                    input.dataset.field = field;
+                    cell.textContent = '';
+                    cell.appendChild(input);
+                }
+            }
+        }
+
 
         // Account scripts
         function showAccounts(page_number){
@@ -147,14 +220,14 @@
                 const $tbody = $("<tbody>").appendTo("#main-table");
                 $.each(response, function(idx, item) {
                     // Object { id: 1, name: "Ниус", title: "Приходящий Без Шума", race: "HOBBIT", profession: "ROGUE", birthday: 1244497480000, banned: false, level: 33 }
-                    $("<tr>").html("<td>" + item.id + "</td>"
-                        + "<td>" + item.name + "</td>"
-                        + "<td>" + item.title + "</td>"
-                        + "<td>" + item.race + "</td>"
-                        + "<td>" + item.profession + "</td>"
+                    $("<tr>").html("<td data-id=" + item.id + ">" + item.id + "</td>"
+                        + "<td data-field='name'>" + item.name + "</td>"
+                        + "<td data-field='title'>" + item.title + "</td>"
+                        + "<td data-field='race'>" + item.race + "</td>"
+                        + "<td data-field='profession'>" + item.profession + "</td>"
                         + "<td>" + item.level + "</td>"
                         + "<td>" + new Date(item.birthday).toLocaleDateString() + "</td>"
-                        + "<td>" + item.banned + "</td>"
+                        + "<td data-field='banned'>" + item.banned + "</td>"
                         + "<td><button id='btn_edit_" + item.id + "' class='btn'>" + "<img src='/img/edit.png' alt='Edit'>" + "</button></td>"
                         + "<td><button id='btn_delete_" + item.id + "' class='btn'>" + "<img src='/img/delete.png' alt='Delete'>" + "</button></td>"
                     ).appendTo($tbody);
@@ -189,6 +262,27 @@
                     alert('Не удалось удалить: ' + (xhr.responseJSON?.message || error));
                 }
             });
+        }
+
+        function editAccount(pressedBtn) {
+            const row = pressedBtn.closest('tr');
+            if (!row) return;
+
+            const btnId = pressedBtn.id.replace('btn_edit_', '');
+            let editingMode = 'editing-mode';
+            const isEditing = pressedBtn.classList.contains(editingMode);
+
+            if (!isEditing) {
+                pressedBtn.classList.add(editingMode);
+
+                const img = pressedBtn.querySelector('img');
+                if (img) img.src = '/img/save.png';
+
+                const btnDelete = document.getElementById('btn_delete_' + btnId);
+                if (btnDelete) btnDelete.classList.add('hidden');
+
+                enableInlineEditing(row, btnId);
+            }
         }
 
 

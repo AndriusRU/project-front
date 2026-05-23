@@ -1,3 +1,12 @@
+/* ID */
+#pagination {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-top: 0.5em;
+}
+
+/* TAGS */
 table {
     border: 2px solid gray;
     width: auto;
@@ -8,6 +17,41 @@ td, th {
     border: 1px solid gray;
     padding: 10px;
     text-align: left;
+}
+
+/* Classes */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2em 0.5em;
+    margin: 0.1em;
+    border: 1px solid #9CA3AF;
+    border-radius: 8px;
+    background: #D1D5DB;
+    color: #111827;
+    font: inherit;
+    cursor: pointer;
+    width: fit-content;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+}
+
+.btn.active {
+    color: red;
+    background: #D1D5DB;
+    border: 2px solid #9CA3AF;
+    font-weight: 600;
+}
+
+.btn.active:hover {
+    background: #BCC5CC;
+    border-color: #78716C;
+}
+
+.btn:hover {
+    background: #BCC5CC;
+    border-color: #8A939C;
 }
 
 .dropdown-list {
@@ -26,44 +70,28 @@ td, th {
     margin-bottom: 5px;
 }
 
-#pagination {
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    margin-top: 0.5em;
+.hidden {
+    display: none;
 }
 
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.2em 0.5em;
-    margin: 0.1em;
+.inline-edit-input {
+    width: 100%;
+    padding: 4px 6px;
+    margin: 0;
     border: 1px solid #9CA3AF;
-    border-radius: 8px;
-    background: #D1D5DB;
-    color: #111827;
-    font: inherit;
-    cursor: pointer;
-    width: fit-content;
-    white-space: nowrap;
-    transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+    border-radius: 4px;
+    font-size: inherit;
+    font-family: inherit;
+    box-sizing: border-box;
+    background: #fff;
 }
 
-.btn:hover {
-    background: #BCC5CC;
-    border-color: #8A939C;
+.inline-edit-input[type="checkbox"] {
+    width: auto;
+    border: none;
+    background: none;
+    padding: 0;
+    justify-content: center;
+    display: block;
+    margin: 0 auto;
 }
-
-.btn.active {
-    color: red;
-    background: #D1D5DB;
-    border: 2px solid #9CA3AF;
-    font-weight: 600;
-}
-
-.btn.active:hover {
-    background: #BCC5CC;
-    border-color: #78716C;
-}
-
