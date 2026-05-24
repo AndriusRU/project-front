@@ -117,7 +117,7 @@
 
             let counterPerPage = document.getElementById("counter-per-page");
             if (counterPerPage) {
-                counterPerPage.addEventListener("change", (e)=>{
+                counterPerPage.addEventListener("change", ()=>{
                     showAccounts(0);
                 });
             }
@@ -144,14 +144,6 @@
                }
 
                 if (btn.id.startsWith('btn_edit_')) {
-                    let btnId = btn.id.replace('btn_edit_','');
-                    // Скрытие кнопки Delete
-                    // document.getElementById('btn_delete_' + btnId).classList.add('hidden');
-                    //
-                    // const selector = '#btn_edit_' + btnId + ' img';
-                    // if (document.querySelector(selector)) {
-                    //     document.querySelector(selector).src = '/img/save.png';
-                    // }
 
                     editSaveAccount(btn);
                 }
