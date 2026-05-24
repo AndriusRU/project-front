@@ -1,7 +1,7 @@
 <html>
 <head>
-    <title>RPG</title>
     <meta charset="UTF-8">
+    <title>RPG</title>
     <script src=https://code.jquery.com/jquery-3.6.0.min.js></script>
     <link href="/css/my.css" rel="stylesheet">
 </head>
@@ -41,8 +41,75 @@
         <label>Pages:</label>
     </div>
 
+    <div id="create-form-container" style="margin-top: 1em; padding-top: 1em; border-top: 2px solid gray;">
+        <h3>Create new account:</h3>
+        <div class="create-form">
+            <div class="form-field">
+                <label for="create-name">Name*</label>
+                <input type="text" id="create-name" class="inline-edit-input" placeholder="1-12 symbols" maxlength="12" required>
+            </div>
+
+            <div class="form-field">
+                <label for="create-title">Title*</label>
+                <input type="text" id="create-title" class="inline-edit-input" placeholder="1-30 symbols" maxlength="30" required>
+            </div>
+
+            <div class="form-field">
+                <label for="create-race">Race*</label>
+                <select id="create-race" class="inline-edit-input" required>
+                    <option value="HUMAN">HUMAN</option>
+                    <option value="DWARF">DWARF</option>
+                    <option value="ELF">ELF</option>
+                    <option value="GIANT">GIANT</option>
+                    <option value="ORC">ORC</option>
+                    <option value="TROLL">TROLL</option>
+                    <option value="HOBBIT">HOBBIT</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="create-profession">Profession*</label>
+                <select id="create-profession" class="inline-edit-input" required>
+                    <option value="WARRIOR">WARRIOR</option>
+                    <option value="ROGUE">ROGUE</option>
+                    <option value="SORCERER">SORCERER</option>
+                    <option value="CLERIC">CLERIC</option>
+                    <option value="PALADIN">PALADIN</option>
+                    <option value="NAZGUL">NAZGUL</option>
+                    <option value="WARLOCK">WARLOCK</option>
+                    <option value="DRUID">DRUID</option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label for="create-level">Level*</label>
+                <input type="number" id="create-level" class="inline-edit-input" min="0" max="100" value="1" required>
+            </div>
+
+            <div class="form-field">
+                <label for="create-birthday">Birthday*</label>
+                <input type="date" id="create-birthday" class="inline-edit-input" min="1970-01-02" required>
+            </div>
+
+            <div class="form-field">
+                <label for="create-banned">Banned</label>
+                <select id="create-banned" class="inline-edit-input">
+                    <option value="false">false</option>
+                    <option value="true">true</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="create-message" style="margin-top: 0.5em; font-size: 0.9em;"></div>
+        <br><br>
+        <button id="btn-create-account" class="btn" style="margin-top: 1em;">
+            Create account
+        </button>
+    </div>
+
+
     <script>
-        // load scripts
+        // Загрузка всех скриптов
         document.addEventListener('DOMContentLoaded', () => {
             //Наполняем Select
             createSelectList()
@@ -90,9 +157,10 @@
                 }
             });
 
+            document.getElementById('btn-create-account').addEventListener('click', createAccount);
         });
 
-        // usefully scripts
+        // Получение количества игрроков
         function getTotalCount() {
             let url = "/rest/players/count";
             let result = 0;
@@ -106,6 +174,7 @@
             return result;
         }
 
+        // Создание списка поля "Количество записей на страницу"
         function createSelectList() {
             const select = document.getElementById('counter-per-page');
 
@@ -123,6 +192,7 @@
             select.value = '5';
         }
 
+        // Получение значения из поля "Количество записей на страницу"
         function getCountPerPage() {
             let counter = document.getElementById("counter-per-page");
 
@@ -135,19 +205,21 @@
             return parseInt(counter.options[selectedIdx].value);
         }
 
+        // Получение активной текущей страницы
         function getCurrentPage() {
             let stringCurrentPage = $('#pagination .btn.active').attr("id");
             stringCurrentPage = stringCurrentPage.replace('page_','');
             return parseInt(stringCurrentPage);
         }
 
-        // Списки значений полей
+        // Списки значений полей (select)
         const selectConfigs = {
             race: ['HUMAN', 'DWARF', 'ELF', 'GIANT', 'ORC', 'TROLL', 'HOBBIT'],
             profession: ['WARRIOR', 'ROGUE', 'SORCERER', 'CLERIC', 'PALADIN', 'NAZGUL', 'WARLOCK', 'DRUID'],
             banned: ['false', 'true']
         };
 
+        // Создание элемента от типа поля (text, select)
         function createSelectHTML(field, idAccount, currentValue) {
             const options = selectConfigs[field];
             if (!options) return '';
@@ -167,6 +239,7 @@
             return '<select id=' + selectId + ' name=' + field + 'data-field=' + field + ' class="inline-edit-input">' + html + '</select>';
         }
 
+        // Доступность поля для внесения изменения
         function enableInlineEditing(row, idAccount) {
             const fieldTypes = {
                 name: 'text',
@@ -201,6 +274,7 @@
 
 
         // Account scripts
+        // Показать таблицу
         function showAccounts(page_number){
             $("tbody").remove();
             let url = "/rest/players";
@@ -249,6 +323,7 @@
 
         }
 
+        // Удалить запись
         function deleteAccount(idAccount) {
             let url = "/rest/players/" + idAccount;
             $.ajax({
@@ -264,6 +339,7 @@
             });
         }
 
+        // Сохранить редактируемую запись
         function saveAccount(id, data, row) {
             const url = '/rest/players/' + id;
             console.log(data);
@@ -301,6 +377,7 @@
             });
         }
 
+        // Нажатие кнопки Edit или Save
         function editSaveAccount(pressedBtn) {
             const row = pressedBtn.closest('tr');
             if (!row) return;
@@ -341,6 +418,105 @@
 
                 saveAccount(btnId, updatedData, row);
             }
+        }
+
+        function createAccount() {
+
+            const messageEl = document.getElementById('create-message');
+            messageEl.textContent = '';
+            messageEl.className = '';
+
+            const formData = {
+                name: document.getElementById('create-name').value.trim(),
+                title: document.getElementById('create-title').value.trim(),
+                race: document.getElementById('create-race').value.trim(),
+                profession: document.getElementById('create-profession').value.trim(),
+                level: document.getElementById('create-level').value.trim(),
+                birthday: document.getElementById('create-birthday').value.trim(),
+                banned: document.getElementById('create-banned').value.trim(),
+            };
+
+            const errors = [];
+
+            if (!formData.name || formData.name.length < 1 || formData.name.length > 12) {
+                errors.push('Name from 1 to 12 symbols.');
+            }
+
+            if (!formData.title || formData.name.title < 1 || formData.name.title > 30) {
+                errors.push('Title from 1 to 30 symbols.');
+            }
+
+            if (!formData.race) errors.push('Choose Race.');
+            if (!formData.profession) errors.push('Choose Profession.');
+
+            if (isNaN(formData.level) || formData.level < 0 || formData.level > 100) {
+                errors.push('Level from 1 to 100.');
+            }
+
+            const birthdayInput = document.getElementById('create-birthday').value;
+            let birthdayTimestamp = 0;
+            if (!formData.birthday) {
+                errors.push('Choose Birthday.');
+            } else {
+                birthdayTimestamp = new Date(birthdayInput).getTime();
+                if (isNaN(birthdayTimestamp) || birthdayTimestamp < 0) {
+                    errors.push('Birthday: Date must be after 01.01.1970');
+                }
+                formData.birthday = birthdayTimestamp;
+            }
+
+            if (errors.length > 0) {
+                messageEl.innerHTML = 'ERRORS: <ul class="error-list">' + errors.map(elem => '<li>' + elem + '</li>').join('') + '</ul>';
+                messageEl.className = 'error';
+                return;
+            }
+
+            const btnCreateAccount = document.getElementById('btn-create-account');
+            btnCreateAccount.disabled = true;
+
+            const url = '/rest/players';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function(response) {
+                    clearCreateForm();
+                    messageEl.innerHTML = 'Account ' + response.name + ' created!';
+                    messageEl.className = 'success';
+
+                    setTimeout(() => {
+                        messageEl.innerHTML = '';
+                        messageEl.className = '';
+                    }, 3000);
+
+                    showAccounts(getCurrentPage());
+                    btnCreateAccount.disabled = false;
+                },
+                error: function(xhr) {
+                    console.error('Error of creation:', xhr.status, xhr.responseText);
+
+                    if (xhr.status === 400) {
+                        messageEl.textContent = 'Error 400: Not valid data. Check fields.';
+                    } else if (xhr.status === 409) {
+                        messageEl.textContent = 'Error 409: Account.';
+                    } else {
+                        messageEl.textContent = 'Error: ' + (xhr.status || 'Unknown error.');
+                    }
+                    messageEl.className = 'error';
+                }
+            })
+
+        }
+
+        function clearCreateForm() {
+            document.getElementById('create-name').value = '';
+            document.getElementById('create-title').value = '';
+            document.getElementById('create-race').value = '';
+            document.getElementById('create-profession').value = '';
+            document.getElementById('create-level').value = '1';
+            document.getElementById('create-birthday').value = '';
+            document.getElementById('create-banned').value = 'false';
         }
 
 
